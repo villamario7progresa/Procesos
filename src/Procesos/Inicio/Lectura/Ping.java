@@ -7,28 +7,29 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Ping {
-    public static void main(String[] args) throws IOException {
+        public static void main(String[] args) {
 
+            //String[] comandoPing = {"cmd", "ping", "-n", "3", "www.google.com"};
+            String[] comandoPingIOS = {"ping", "-c", "3", "www.google.com"};
 
-        String[] comandoPing = {"cmd", "/C", "ping", "-n", "3", "www.gogle.com"};
-        Process process = null;
-        try {
-            process = new ProcessBuilder(comandoPing).start();
-        } catch (IOException e) {
-            System.out.println("error al crear el pin");
-        }
-
-        if (process != null) {
-            BufferedReader brPing = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String linea;
+            Process process = null;
             try {
-                while ((linea = brPing.readLine()) != null) {
-                    System.out.println(linea);
-                }
-
+                process = new ProcessBuilder(comandoPingIOS).start();
             } catch (IOException e) {
-                System.out.println("error al leer ");
+                System.out.println("ERROR al crear el proceso PING");
             }
+
+            if (process != null) {
+                BufferedReader brPING = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String linea;
+                try {
+                    while ((linea = brPING.readLine()) != null) {
+                        System.out.println(linea);
+                    }
+                } catch (IOException e) {
+                    System.out.println("ERROR al leer desde el proceso PING");
+                }
+            }
+
         }
     }
-}

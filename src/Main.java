@@ -3,153 +3,142 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        String respuesta = "";
+        String opcion = "";
+        Process proceso = null;
 
-        do{
+        do {
             mostrarMenu();
-            respuesta = leerString();
-            ejecutarRespuesta(respuesta);
+            opcion = elegir();
+            ejecutarRespuesta(opcion, proceso);
 
-        }while(!respuesta.equals("5"));
-
+        }while(!opcion.equals("5"));
     }
 
-    private static String leerString(){
-        BufferedReader br =
-                new BufferedReader(new InputStreamReader(System.in));
-        String respuesta = "";
-        try{
-            respuesta= br.readLine();
-        }catch (IOException e){
-            System.out.println("error");
-        }
-        return respuesta;
-    }
 
     private static void mostrarMenu(){
-        System.out.println("1.Navegacion");
-        System.out.println("2.Paint");
-        System.out.println("3.Task manager");
-        System.out.println("4.Calculadora");
-        System.out.println("5.Salir");
-        System.out.println("¿Que quieres hacer?");
+        System.out.println("""
+                ---- MENU ----
+                1. Paint
+                2. Calculadora
+                3. Notepad (debería ser el task manager)
+                4. Safari
+                5. Salir
+                ¿Qué quieres hacer?""");
     }
 
-    private static void ejecutarRespuesta(String respuesta){
-        Process proceso = null;
-        switch (respuesta){
+    private static String elegir(){
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        String opcion = "";
+        try {
+            opcion = br.readLine();
+        } catch (IOException e) {
+            System.out.println("ERROR al leer desde teclado");
+        }
+        return opcion;
+    }
+
+
+    private static void ejecutarRespuesta(String opcion, Process proceso){
+        switch (opcion) {
             case "1":
-                String[] comandoNavegacion = {"navegacion"};
-                proceso = ejecutarProceso(comandoNavegacion);
+                //Paint
+                String[] comando1 = {"open", "/System/Applications/Freeform.app"};
+                proceso = ejecutarProceso(comando1);
                 break;
             case "2":
-                String[] comando2 = {"mspaint"};
+                //Calculadora
+                String[] comando2 = {"open", "/System/Applications/Calculator.app"};
                 proceso = ejecutarProceso(comando2);
-                break;
             case "3":
-                String[] comando3 = {"taskmgr"};
+                //Notepad (aunque debería de ser el task manager)
+                String[] comando3 = {"open", "/System/Applications/Calculator.app"};
                 proceso = ejecutarProceso(comando3);
                 break;
             case "4":
-                String[] comando4 = {"calc"};
-                proceso = ejecutarProceso(comando4);
+                //Safari
+                String[] comandos = pedirDatosNavegador();
+                proceso = ejecutarProceso(comandos);
                 break;
             case "5":
-                System.out.println("adios");
+                System.out.println("Saliendo...");
                 break;
             default:
-                System.out.println("error");
+                System.out.println("Opción incorrecta");
         }
-
-        if (proceso != null){
+        if(proceso != null){
             int salida = 0;
             try{
                 salida = proceso.waitFor();
-            }catch (InterruptedException e){
-                System.out.println("error al esperar al subproceso");
+            } catch(InterruptedException e){
+                System.out.println("ERROR al esperar al subproceso");
             }
-            System.out.println("proceso terminado con salida");
+            System.out.println("Proceso terminado con salida " + salida);
         }
+
+    }
+
+    private static Process ejecutarProceso(String[] comando){
+        ProcessBuilder pb = new ProcessBuilder(comando);
+        Process proceso = null;
+        try {
+            proceso = pb.start();
+        } catch (IOException e) {
+            System.out.println("Error al abrir el proceso");
+        }
+        return proceso;
+    }
+
+
+    private static String[] pedirDatosNavegador(){
+        System.out.println("¿Cuántas URLs quieres abrir?");
+        int numUrls = recogerNumero();
+
+        String[] comandos = new String[numUrls+3];
+        comandos[0] = "open";
+        comandos[1] = "-a";
+        comandos[2] = "Safari";
+
+        for(int i=3; i<numUrls+3; i++) {
+            System.out.println("Dime la URL");
+            comandos[i] =  "https://" + recogerRespuesta();
+        }
+        System.out.println(Arrays.toString(comandos));
+        return comandos;
     }
 
     private static int recogerNumero(){
         boolean encontrado = false;
         int num = 0;
-        do {
-            try{
-                num = Integer.parseInt(leerString());
-                encontrado=true;
-            }catch (NumberFormatException e){
-                System.out.println("tiene que ser un numero");
-            }
 
-        }while (!encontrado);
+        do{
+            try {
+                num = Integer.parseInt(recogerRespuesta());
+                encontrado = true;
+            }catch(NumberFormatException e){
+                System.out.println("Tiene que ser un número");
+            }
+        }while(!encontrado);
 
         return num;
     }
 
-    private static Process ejecutarProceso(String[] comando) {
-        ProcessBuilder pb = new ProcessBuilder(comando);
-        try{
-            Process proceso = pb.start();
+    private static String recogerRespuesta(){
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        } catch (Exception e) {
-            System.out.println("error");
+        String cantWebs = "";
+        try {
+            cantWebs = br.readLine();
+        } catch (IOException e) {
+            System.out.println("ERROR al leer desde teclado");;
         }
-
-        return null;
-    }
-
-    private static String[] paginasArray() {
-        System.out.println("cuantas paginas quieres abrir?");
-        int numPaginas = recogerNumero();
-        String[] paginasArray = new String[numPaginas + 1];
-        paginasArray[0] = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
-
-        for (int i = 1; i < numPaginas; i++) {
-            System.out.println("que pagina quieres? (www.pagina.com)");
-            paginasArray[i + 1] = leerString();
-        }
-        return paginasArray;
-    }
-
-
-    private static void calculadora (){
-    String[] comando = {"calc"};
-    ProcessBuilder pb = new ProcessBuilder(comando);
-        try{
-        Process proceso = pb.start();
-
-    } catch (Exception e) {
-        System.out.println("error");
-        }
-    }
-
-    private static void paint(){
-        String[] comando = {"mspaint"};
-        ProcessBuilder pb = new ProcessBuilder(comando);
-        try{
-            Process proceso = pb.start();
-
-        } catch (Exception e) {
-            System.out.println("error");
-        }
-    }
-
-    private static void notepad(){
-        String[] comando = {"notepad"};
-        ProcessBuilder pb = new ProcessBuilder(comando);
-        try{
-            Process proceso = pb.start();
-
-        } catch (Exception e) {
-            System.out.println("error");
-        }
+        return cantWebs;
     }
 
 }
